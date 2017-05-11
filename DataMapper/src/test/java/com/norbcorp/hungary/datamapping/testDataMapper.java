@@ -1,17 +1,17 @@
 package com.norbcorp.hungary.datamapping;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Created by nor on 2017.05.06..
@@ -64,6 +64,19 @@ public class testDataMapper {
         assertEquals(DataMapper.newInstance().setEagerLoadingAllowed(false).mappingDTOToEntity(dto, entity).getAge().intValue(),10);
         assertNull(DataMapper.newInstance().setEagerLoadingAllowed(false).mappingDTOToEntity(dto, entity).getStrings());
         assertNotNull(DataMapper.newInstance().setEagerLoadingAllowed(true).mappingDTOToEntity(dto, entity));
+    }
+    
+    @Test
+    public void testMappingEntitiesToDTOs(){
+    	List<Entity> entities=new LinkedList<Entity>();
+    	entities.add(new Entity());
+    	
+    	assertEquals(1,DataMapper.newInstance().mappingEntitiesToDTOs(entities, DTO.class).size());
+    	Entity entity = new Entity();
+    	entity.setName("Entity mapping test");
+    	entities.add(entity);
+    	assertEquals("Entity mapping test",DataMapper.newInstance().mappingEntitiesToDTOs(entities, DTO.class).get(1).getName());
+    	assertEquals(2,DataMapper.newInstance().mappingEntitiesToDTOs(entities, DTO.class).size());
     }
 }
 

@@ -3,6 +3,8 @@ package com.norbcorp.hungary.datamapping;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class for back and forth mapping. It maps values between entities and data transfer objects.
@@ -48,6 +50,25 @@ public class DataMapper{
         return this;
     }
 
+    /**
+     * Copies values of entities to DTO list.
+     * 
+     * @param entities list of given entities
+     * @param dto class of the given dto
+     * @return list of DTOs containing values of entities
+     */
+    public <DTO,ENTITY> List<DTO> mappingEntitiesToDTOs(List<ENTITY> entities, Class<DTO> dto) {
+    	List<DTO> dtos=new LinkedList<DTO>();
+    	try {
+    		for(ENTITY entity : entities)
+    			dtos.add(mappingEntityToDTO(entity,dto.newInstance()));
+			
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+    	return dtos;
+    }
+    
     /**
      * It copies values of an entity into the given dto. Getters and setters are used.
      *
