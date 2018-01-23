@@ -1,16 +1,11 @@
 package com.norbcorp.hungary.datamapping;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
+import com.norbcorp.hungary.datamapping.util.DTO;
+import com.norbcorp.hungary.datamapping.util.Entity;
+import org.junit.Test;
 
 import java.sql.Date;
 import java.time.Instant;
-
-import org.junit.Test;
-
-import com.norbcorp.hungary.datamapping.util.DTO;
-import com.norbcorp.hungary.datamapping.util.Entity;
 
 public class DataMapperConfigurationTest {
 
@@ -23,9 +18,8 @@ public class DataMapperConfigurationTest {
         entity.setName("Test");
         entity.setDateOfRegistration(Date.from(Instant.now()));
         DataMapper dataMapper = DataMapper.newInstance();
-        
-        assertThat(dataMapper.getConfiguration().isEagerLoadingAllowed(),is(equalTo(false)));
-        dataMapper.getConfiguration().setEagerLoadingAllowed(true);
-        assertThat(dataMapper.getConfiguration().isEagerLoadingAllowed(), is(equalTo(true)));
+
+        dataMapper.getConfiguration().addMappings(entity::getName, dto::setName);
+        dataMapper.getConfiguration().addMappings(entity::getDateOfRegistration, dto::setDateOfRegistration);
     }
 }
