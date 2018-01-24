@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Class for back and forth mapping. It maps values between entities and data transfer objects.
@@ -12,6 +13,8 @@ import java.util.List;
  * Created by nor on 2017.05.06..
  */
 public class DataMapper{
+
+    private static Logger logger = Logger.getLogger(DataMapper.class.getName());
 
     /**
      * Create a DataMapper instance with default configuration.
@@ -35,7 +38,7 @@ public class DataMapper{
     private Configuration configuration;
 
     /**
-     * Map list of entities to another type of objects.
+     * Map list of object to another type of objects.
      *
      * @param fromList list of source object
      * @param to class of destination object.
@@ -44,15 +47,15 @@ public class DataMapper{
      * @return list of destination entities
      */
     public <T,F> List<T> mapList(List<F> fromList, Class<T> to) {
-        List<T> dtos=new LinkedList<T>();
+        List<T> tos=new LinkedList<>();
         try {
-            for(F entity : fromList)
-                dtos.add(map(entity,to.newInstance()));
-
+            for(F entity : fromList) {
+                tos.add(map(entity, to.newInstance()));
+            }
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-        return dtos;
+        return tos;
     }
 
 
@@ -66,27 +69,31 @@ public class DataMapper{
      * @return with an object with T type containing the mapped values.
      */
     public <F,T> T map(F from,T to) {
-        for(Method m : from.getClass().getDeclaredMethods()){
-            if(m.getName().startsWith("get")){
-                String name=m.getName().substring(3);
-                for(Method methodOfEntity : to.getClass().getDeclaredMethods()){
-                    if(methodOfEntity.getName().contains(name) && methodOfEntity.getName().startsWith("set")){
-                        try {
-                            if(configuration.isEagerLoadingAllowed() && (Collection.class.isAssignableFrom(m.getReturnType()))){
-                                methodOfEntity.invoke(to, m.invoke(from));
-                            } else if(!Collection.class.isAssignableFrom(m.getReturnType())) {
-                                methodOfEntity.invoke(to, m.invoke(from));
+        if(getConfiguration().getSelectedMappingType()==Configuration.MappingType.NORMAL || getConfiguration().getSelectedMappingType()== Configuration.MappingType.CUSTOM_AND_NORMAL)
+            for(Method m : from.getClass().getDeclaredMethods()){
+                if(m.getName().startsWith("get")){
+                    String name=m.getName().substring(3);
+                    for(Method methodOfEntity : to.getClass().getDeclaredMethods()){
+                        if(methodOfEntity.getName().substring(3).equals(name) && methodOfEntity.getName().startsWith("set")){
+                            try {
+                                if(configuration.isEagerLoadingAllowed() && (Collection.class.isAssignableFrom(m.getReturnType()))){
+                                    methodOfEntity.invoke(to, m.invoke(from));
+                                } else if(!Collection.class.isAssignableFrom(m.getReturnType())) {
+                                    methodOfEntity.invoke(to, m.invoke(from));
+                                }
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            } catch (InvocationTargetException e) {
+                                e.printStackTrace();
+                            } catch (NullPointerException npe){
+                                System.out.println("NullPointerException happened");
                             }
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        } catch (NullPointerException npe){
-                            System.out.println("NullPointerException happened");
                         }
                     }
                 }
             }
+        if(getConfiguration().getSelectedMappingType()==Configuration.MappingType.CUSTOM || getConfiguration().getSelectedMappingType() == Configuration.MappingType.CUSTOM_AND_NORMAL){
+            getConfiguration().getMappings().forEach((supplier, consumer) -> consumer.accept(supplier.get()));
         }
         return to;
     }

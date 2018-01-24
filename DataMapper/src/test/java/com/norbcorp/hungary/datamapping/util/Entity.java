@@ -21,6 +21,22 @@ public class Entity {
         strings.add("asdk");
     }
 
+    public Entity() {
+    }
+
+    public Entity(String name, Integer age, Date dateOfRegistration) {
+        this.name = name;
+        this.age = age;
+        this.dateOfRegistration = dateOfRegistration;
+    }
+
+    public Entity(String name, Integer age, Date dateOfRegistration, String description) {
+        this.name = name;
+        this.age = age;
+        this.dateOfRegistration = dateOfRegistration;
+        this.description = description;
+    }
+
     public List<String> getStrings(){;
         return strings;
     }

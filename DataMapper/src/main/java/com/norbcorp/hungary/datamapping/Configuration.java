@@ -3,18 +3,19 @@ package com.norbcorp.hungary.datamapping;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 /**
  * Configuration of DataMapper class.
  */
 class Configuration {
+    private static Logger logger = Logger.getLogger(Configuration.class.getName());
 
     /**
      * Custom mappings of values.
      */
-    private Map<Supplier,Consumer> mappings = new HashMap<Supplier, Consumer>();
+    private static Map<Supplier,Consumer> mappings = new HashMap<>();
 
     /**
      *  Parameter of eager loading of collections.
@@ -24,8 +25,10 @@ class Configuration {
 
     /**
      * Selected mapping type.
+     *
+     * The default option is normal.
      */
-    public MappingType selectedMappingType;
+    private MappingType selectedMappingType = MappingType.NORMAL;
 
     /**
      * Type of the mapping.
@@ -34,11 +37,11 @@ class Configuration {
      * <i>CUSTOM_AND_NORMAL</i>: combination of the previous two.
      */
     public enum MappingType {
-        ONLY_CUSTOM, NORMAL, CUSTOM_AND_NORMAL
+        CUSTOM, NORMAL, CUSTOM_AND_NORMAL
     }
 
     /**
-     * Eager loading of collections. If it is set to true, it will invoke getters of collactions. Otherwise it will not.
+     * Eager loading of collections. If it is set to true, it will invoke getters of collections. Otherwise it will not.
      *
      * @return boolean of eagerLoadingAllowed parameter.
      */
@@ -57,15 +60,10 @@ class Configuration {
         return this;
     }
 
-   /* public void addMappings(Object from, Object to){
-        Function getter;
-        if(from instanceof Function)
-            getter = (Function)from;
-    }*/
-
-    public <T> void addMappings(Supplier<T> supplier, Consumer<T> consumer){
+    public <T> void addMapping(Supplier<T> supplier, Consumer<T> consumer){
         mappings.put(supplier, consumer);
     }
+
 
     public Map<Supplier, Consumer> getMappings() {
         return mappings;
@@ -73,5 +71,13 @@ class Configuration {
 
     public void setMappings(Map<Supplier, Consumer> mappings) {
         this.mappings = mappings;
+    }
+
+    public MappingType getSelectedMappingType() {
+        return selectedMappingType;
+    }
+
+    public void setSelectedMappingType(MappingType selectedMappingType) {
+        this.selectedMappingType = selectedMappingType;
     }
 }
