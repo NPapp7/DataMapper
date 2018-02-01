@@ -1,5 +1,7 @@
 package com.norbcorp.hungary.datamapping;
 
+import com.norbcorp.hungary.datamapping.configuration.Configuration;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -10,7 +12,7 @@ import java.util.logging.Logger;
 /**
  * Class for back and forth mapping. It maps values between entities and data transfer objects.
  *
- * Created by nor on 2017.05.06..
+ * Created by nor on 2017.05.06.
  */
 public class DataMapper{
 
@@ -20,7 +22,6 @@ public class DataMapper{
      * Create a DataMapper instance with default configuration.
      */
     private DataMapper(){
-        configuration = new Configuration();
     }
 
     /**
@@ -29,7 +30,9 @@ public class DataMapper{
      * @return new DataMapper instance.
      */
     public static DataMapper newInstance(){
-        return new DataMapper();
+        DataMapper dataMapper = new DataMapper();
+        dataMapper.configuration = Configuration.getConfiguration();
+        return dataMapper;
     }
 
     /**
@@ -50,7 +53,12 @@ public class DataMapper{
         List<T> tos=new LinkedList<>();
         try {
             for(F entity : fromList) {
-                tos.add(map(entity, to.newInstance()));
+                    T to1 = to.newInstance();
+                    if(configuration.getSelectedMappingType() == Configuration.MappingType.CUSTOM || configuration.getSelectedMappingType() == Configuration.MappingType.CUSTOM_AND_NORMAL)
+                        getConfiguration().getCustomMappings().forEach((setter, getter) -> {setter.set(to1, getter.get(entity)); });
+                    if(configuration.getSelectedMappingType() == Configuration.MappingType.CUSTOM_AND_NORMAL || configuration.getSelectedMappingType() == Configuration.MappingType.NORMAL)
+                        map(entity, to1);
+                    tos.add(to1);
             }
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
@@ -81,11 +89,9 @@ public class DataMapper{
                                 } else if(!Collection.class.isAssignableFrom(m.getReturnType())) {
                                     methodOfEntity.invoke(to, m.invoke(from));
                                 }
-                            } catch (IllegalAccessException e) {
+                            } catch (IllegalAccessException|InvocationTargetException e) {
                                 e.printStackTrace();
-                            } catch (InvocationTargetException e) {
-                                e.printStackTrace();
-                            } catch (NullPointerException npe){
+                            }  catch (NullPointerException npe){
                                 System.out.println("NullPointerException happened");
                             }
                         }
@@ -93,7 +99,7 @@ public class DataMapper{
                 }
             }
         if(getConfiguration().getSelectedMappingType()==Configuration.MappingType.CUSTOM || getConfiguration().getSelectedMappingType() == Configuration.MappingType.CUSTOM_AND_NORMAL){
-            getConfiguration().getMappings().forEach((supplier, consumer) -> consumer.accept(supplier.get()));
+            getConfiguration().getMappings().forEach((supplier, consumer) ->  consumer.accept(supplier.get()));
         }
         return to;
     }
@@ -102,7 +108,4 @@ public class DataMapper{
         return configuration;
     }
 
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
 }

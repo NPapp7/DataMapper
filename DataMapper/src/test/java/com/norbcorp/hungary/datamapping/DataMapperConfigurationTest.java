@@ -1,5 +1,6 @@
 package com.norbcorp.hungary.datamapping;
 
+import com.norbcorp.hungary.datamapping.configuration.Configuration;
 import com.norbcorp.hungary.datamapping.util.CustomAndNormalConfigurationDTO;
 import com.norbcorp.hungary.datamapping.util.DTO;
 import com.norbcorp.hungary.datamapping.util.Entity;
@@ -80,5 +81,47 @@ public class DataMapperConfigurationTest {
         assertThat(entities.get(0).getDateOfRegistration(), is(equalTo(result.get(0).getDateOfRegistration())));
         assertThat(entities.get(1).getDateOfRegistration(), is(equalTo(result.get(1).getDateOfRegistration())));
         assertThat(entities.get(2).getDateOfRegistration(), is(equalTo(result.get(2).getDateOfRegistration())));
+    }
+
+    @Test
+    public void testMapListCustomConfiguration(){
+        List<Entity> entities=new LinkedList<>();
+        entities.add(entity);
+        entities.add(new Entity("test2", 20, Date.from(Instant.now())));
+        entities.add(new Entity("test3", 20, Date.from(Instant.now())));
+
+        dataMapper.getConfiguration().setSelectedMappingType(Configuration.MappingType.CUSTOM);
+        dataMapper.getConfiguration().addMapping(Entity::getName, DTO::setName);
+        List<DTO> result = dataMapper.mapList(entities, DTO.class);
+
+        assertThat(3, is(equalTo(result.size())));
+        assertThat(result.get(0).getName(), is(equalTo(entities.get(0).getName())));
+        assertThat(result.get(1).getName(), is(equalTo(entities.get(1).getName())));
+        assertThat(result.get(2).getName(), is(equalTo(entities.get(2).getName())));
+    }
+
+    @Test
+    public void testMapListCustomAndNormalConfiguration(){
+        List<Entity> entities=new LinkedList<>();
+        entities.add(entity);
+        entities.add(new Entity("test2", 21, Date.from(Instant.now())));
+        entities.add(new Entity("test3", 22, Date.from(Instant.now())));
+
+        dataMapper.getConfiguration().setSelectedMappingType(Configuration.MappingType.CUSTOM_AND_NORMAL);
+        dataMapper.getConfiguration().addMapping(Entity::getName, DTO::setName);
+        List<DTO> result = dataMapper.mapList(entities, DTO.class);
+
+        assertThat(3, is(equalTo(result.size())));
+        assertThat(result.get(0).getName(), is(equalTo(entities.get(0).getName())));
+        assertThat(result.get(1).getName(), is(equalTo(entities.get(1).getName())));
+        assertThat(result.get(2).getName(), is(equalTo(entities.get(2).getName())));
+
+        assertThat(result.get(0).getDateOfRegistration(), is(equalTo(entities.get(0).getDateOfRegistration())));
+        assertThat(result.get(1).getDateOfRegistration(), is(equalTo(entities.get(1).getDateOfRegistration())));
+        assertThat(result.get(2).getDateOfRegistration(), is(equalTo(entities.get(2).getDateOfRegistration())));
+
+        assertThat(result.get(0).getAge(), is(equalTo(entities.get(0).getAge())));
+        assertThat(result.get(1).getAge(), is(equalTo(entities.get(1).getAge())));
+        assertThat(result.get(2).getAge(), is(equalTo(entities.get(2).getAge())));
     }
 }
