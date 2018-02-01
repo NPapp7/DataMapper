@@ -27,3 +27,11 @@ dataMapper.getConfiguration().setSelectedMappingType(Configuration.MappingType.N
 dataMapper.getConfiguration().setSelectedMappingType(Configuration.MappingType.CUSTOM_AND_NORMAL);
 dataMapper.getConfiguration().setSelectedMappingType(Configuration.MappingType.CUSTOM);
 ```
+
+It is possible to create mapping between classes. It is very useful for mapping lists. For example,
+
+```java
+dataMapper.getConfiguration().setSelectedMappingType(Configuration.MappingType.CUSTOM_AND_NORMAL);
+dataMapper.getConfiguration().addMapping(Entity::getName, DTO::setName);
+List<DTO> result = dataMapper.mapList(entities, DTO.class);
+```
